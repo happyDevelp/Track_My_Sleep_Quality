@@ -66,7 +66,7 @@ dependencies {
 //    implementation ("android.arch.navigation:navigation-ui-ktx:1.0.0")
 //
 //    // ViewModel and LiveData
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0")
 //
 //    // Kotlin Extensions and Coroutines support for Room
     implementation("androidx.room:room-ktx:2.6.0")
