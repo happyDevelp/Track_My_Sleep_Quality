@@ -16,13 +16,14 @@ import com.example.android.trackmysleepquality.database.SleepDatabase
 import com.example.android.trackmysleepquality.database.SleepDatabaseDao
 import com.example.trackmysleepquality.R
 import com.example.trackmysleepquality.databinding.FragmentSleepTrackerBinding
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.observeOn
 import kotlinx.coroutines.launch
 
 class SleepTrackerFragment : Fragment() {
 
-    lateinit var binding: FragmentSleepTrackerBinding
+    private lateinit var binding: FragmentSleepTrackerBinding
     private lateinit var viewModel: SleepTrackerViewModel
 
     override fun onCreateView(
@@ -57,8 +58,15 @@ class SleepTrackerFragment : Fragment() {
                 this.findNavController().navigate(SleepTrackerFragmentDirections.actionSleepTrackerFragmentToSleepQualityFragment(night.nightId))
                 sleepTrackerViewModel.doneNavigation()
             }
-
             binding.sleepTrackerViewModel
+        }
+
+        sleepTrackerViewModel.showSnackBarEvemt.observe(viewLifecycleOwner) {
+            if(it == true){
+                Snackbar.make(requireActivity().findViewById(android.R.id.content), getString(R.string.cleared_message), Snackbar.LENGTH_SHORT)
+                    .show()
+                sleepTrackerViewModel.doneShowingSnackbar()
+            }
 
         }
 

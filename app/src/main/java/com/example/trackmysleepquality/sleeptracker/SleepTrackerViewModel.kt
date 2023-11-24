@@ -29,6 +29,15 @@ class SleepTrackerViewModel(val database: SleepDatabaseDao, application: Applica
         viewModelJob.cancel()
     }
 
+
+    private var _showSnackBarEvent = MutableLiveData<Boolean>()
+    val showSnackBarEvemt: LiveData<Boolean>
+        get() = _showSnackBarEvent
+
+    fun doneShowingSnackbar() {
+        _showSnackBarEvent.value = null
+    }
+
     //Create Scope where specify in which thread will coroutine work. And also specify a Job
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
@@ -40,6 +49,15 @@ class SleepTrackerViewModel(val database: SleepDatabaseDao, application: Applica
     val nightsString = nights.map { nights ->
         formatNights(nights, application.resources)
     }
+
+    val startButtonVisible = tonight.map { null == it }
+
+    val stopButtonVisible = tonight.map { null !== it }
+
+    val clearButtonVisible = nights.map { it.isNotEmpty() }
+
+
+
 
     private val _navigateToQuality = MutableLiveData<SleepNight?>()
     val  navigateToQuality: LiveData<SleepNight?>
@@ -115,6 +133,7 @@ class SleepTrackerViewModel(val database: SleepDatabaseDao, application: Applica
         uiScope.launch {
             clear()
             tonight.value = null
+            _showSnackBarEvent.value = true
         }
     }
 
