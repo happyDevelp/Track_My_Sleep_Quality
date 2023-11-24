@@ -3,7 +3,9 @@ package com.example.trackmysleepquality.sleeptracker
 import android.app.Application
 import androidx.constraintlayout.widget.ConstraintSet.Transform
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.example.android.trackmysleepquality.database.SleepDatabaseDao
 import com.example.android.trackmysleepquality.database.SleepNight
@@ -17,10 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.xml.transform.Transformer
 
-class SleepTrackerViewModel(
-    val database: SleepDatabaseDao, application: Application
-) : AndroidViewModel(application) {
-
+class SleepTrackerViewModel(val database: SleepDatabaseDao, application: Application) : AndroidViewModel(application) {
     //Make it possible to start or stop coroutine. It give to manage a state of coroutine`s processing
     private var viewModelJob = Job()
 
@@ -34,7 +33,7 @@ class SleepTrackerViewModel(
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
     /*private var tonight = MutableLiveData<SleepNight?>(*/
-    private var tonight = MutableStateFlow<SleepNight?>(null)
+    private var tonight = MutableLiveData<SleepNight?>()
 
     private var nights = database.getAllNights()
 
@@ -42,16 +41,13 @@ class SleepTrackerViewModel(
         formatNights(nights, application.resources)
     }
 
+    private val _navigateToQuality = MutableLiveData<SleepNight?>()
+    val  navigateToQuality: LiveData<SleepNight?>
+        get() = _navigateToQuality
 
-
-
-
-
-/*
-    val nightsString = Transformations.map(nights) { nights ->
-        formatNights(nights, application.resources)
+    fun doneNavigation(){
+        _navigateToQuality.value = null
     }
-*/
 
 
     init {
@@ -105,6 +101,7 @@ class SleepTrackerViewModel(
             oldNight.endTimeMilli = System.currentTimeMillis()
 
             update(oldNight)
+            _navigateToQuality.value = oldNight
         }
     }
 
@@ -122,7 +119,9 @@ class SleepTrackerViewModel(
     }
 
     private suspend fun clear() {
-        database.clear()
+        CoroutineScope(Dispatchers.IO).launch {
+            database.clear()
+        }
     }
 
 

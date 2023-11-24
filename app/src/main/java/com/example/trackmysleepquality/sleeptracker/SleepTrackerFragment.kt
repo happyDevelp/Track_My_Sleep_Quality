@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.fragment.findNavController
 import com.example.android.trackmysleepquality.database.SleepDatabase
 import com.example.android.trackmysleepquality.database.SleepDatabaseDao
 import com.example.trackmysleepquality.R
@@ -39,7 +40,6 @@ class SleepTrackerFragment : Fragment() {
         val application = requireNotNull(this.activity).application
 
         val dataSource = SleepDatabase.getInstance(application).sleepDatabaseDao
-
         val viewModelFactory = SleepTrackerViewModelFactory(dataSource, application)
 
         val sleepTrackerViewModel = ViewModelProvider(this, viewModelFactory).get(SleepTrackerViewModel::class.java)
@@ -52,22 +52,42 @@ class SleepTrackerFragment : Fragment() {
             .get(SleepTrackerViewModel::class.java)
 
 
-        viewLifecycleOwner.lifecycleScope.launch {
+        sleepTrackerViewModel.navigateToQuality.observe(viewLifecycleOwner) {night ->
+            night?.let {
+                this.findNavController().navigate(SleepTrackerFragmentDirections.actionSleepTrackerFragmentToSleepQualityFragment(night.nightId))
+                sleepTrackerViewModel.doneNavigation()
+            }
+
+            binding.sleepTrackerViewModel
+
+        }
+
+
+        //stateFlow
+        /*viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){
                 viewModel.nightsString.collect() {
                     binding.textview.text = viewModel.nightsString.toString()
                 }
             }
+        }*/
+
+
+        //LiveData
+      /*  viewModel.nightsString.observe(viewLifecycleOwner) {
+            binding.textview.text = viewModel.nightsString.toString()
         }
 
+        binding.startButton.setOnClickListener {
+            sleepTrackerViewModel.onStartTracking()
+        }
 
+        binding.stopButton.setOnClickListener {
+            sleepTrackerViewModel.onStopTracking()
+        }
 
-
-
-/*        lifecycleScope.launch {
-            viewModel.nightsString.collect() {
-                binding.textview.text = viewModel.nightsString.toString()
-            }
+        binding.clearButton.setOnClickListener {
+            sleepTrackerViewModel.onClear()
         }*/
 
 
